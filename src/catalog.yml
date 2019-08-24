@@ -3,6 +3,10 @@ PREDEF:
 
 CHAPS:
   - 01-tsubame.re
+  - 02-chainer_rl.re
+  - 03-chainer_cv.re
+  - 04-cupy.re
+  - 05-chainer_contribute.re
 
 APPENDIX:
 
