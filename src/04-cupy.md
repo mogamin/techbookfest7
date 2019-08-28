@@ -69,11 +69,37 @@ sudo apt update
 sudo apt install rocm-dkms
 ```
 
+`/opt/rocm` 以下に様々なツールなども含め必要なものがインストールされるので、次回ログイン時から必要なパスなどが通っている状態になるように、以下のような環境変数の設定を `~/.bashrc` に追加しておきます。
+
+```bash
+echo 'export ROCM_HOME=/opt/rocm' >> ~/.bashrc
+echo 'export PATH=$ROCM_HOME/bin:$PATH' >> ~/.bashrc
+echo 'export CUDA_PATH=/opt/rocm' >> ~/.bashrc
+```
+
 最後に、ROCm を使用したいユーザを `video` グループに追加します。
 以下のコマンドでは、現在のログインユーザを追加しています。
 
 ```bash
 sudo usermod -a -G video $LOGNAME
+```
+
+一度ログアウトして、ログインし直してください。
+そして以下のコマンドを実行してみましょう。
+
+```bash
+rocm-smi
+```
+
+ROCm の環境構築がうまくいっていれば、以下のような（数値等は GPU の種類によって異なります）出力が表示されます。
+
+```bash
+ ========================ROCm System Management Interface========================
+================================================================================
+GPU  Temp   AvgPwr  SCLK     MCLK    Fan    Perf  PwrCap  VRAM%  GPU%  
+0    50.0c  10.0W   1269Mhz  167Mhz  14.9%  auto  220.0W    0%   0%    
+================================================================================
+==============================End of ROCm SMI Log ==============================
 ```
 
 以上で、基本的な環境構築は完了です。
@@ -92,16 +118,22 @@ sudo apt install hipblas hipsparse rocrand
 
 ```bash
 export HCC_AMDGPU_TARGET=gfx900
-export ROCM_HOME=/opt/rocm
 export CUPY_INSTALL_USE_HIP=1
-export PATH=$ROCM_HOME/bin:$PATH
-export CUDA_PATH=/opt/rocm
 ```
 
 このとき、`HCC_AMDGPU_TARGET` に与える値は、使っている AMD GPU によって変更する必要があります。
 ROCm がサポートしている GPU や CPU の一覧は、こちらから調べることができます：https://rocm.github.io/hardware.html
 
 次に、CuPy のビルドに必要な Python パッケージをインストールします。
+ここからは簡単のため、システムに `apt` でインストールされている `python3` を用います。
+もし `pip3` がインストールされていなければ、まず
+
+```bash
+sudo apt install python3-pip
+```
+
+として `pip3` コマンドをインストールしてください。
+`pip3` が準備できたら、`cython` と `numpy` パッケージをインストールします。
 
 ```bash
 pip3 install cython numpy
@@ -111,13 +143,11 @@ pip3 install cython numpy
 
 ```bash
 # ブランチのクローン
-git clone https://github.com/okuta/cupy -b support-hip
+git clone https://github.com/okuta/cupy -b support-hip --depth=1
 
 cd cupy
 
 # CuPy のビルドとインストール
-CFLAGS="-I/opt/rocm/include -I/opt/rocm/hiprand/include -I/opt/rocm/rocrand/include" \
-LDFLAGS="-L/opt/rocm/lib -L/opt/rocm/hiprand/lib -L/opt/rocm/rocrand/lib -L/opt/rocm/hip/lib" \
 pip3 install -e . -vvv
 ```
 
@@ -237,35 +267,24 @@ Downloading from http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz...
 Downloading from http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz...
 
 epoch       main/loss   validation/main/loss  main/accuracy  validation/main/accuracy  elapsed_time
-1           0.191636    0.104016              0.941749       0.9677                    14.0415       
-2           0.0725324   0.0809784             0.977365       0.9736                    17.9653       
-3           0.0483136   0.07426               0.984282       0.9781                    21.9157       
-4           0.0356667   0.0665017             0.988582       0.9802                    25.8826       
-5           0.029242    0.0783757             0.990431       0.976                     29.8337       
-6           0.0240914   0.0915075             0.991882       0.976                     33.7948       
-7           0.0202024   0.070404              0.993548       0.9807                    37.726        
-8           0.0171451   0.0737094             0.994632       0.9824                    41.7049       
-9           0.0175979   0.0860599             0.994165       0.9818                    45.6674       
-10          0.0174146   0.08188               0.994615       0.9804                    49.6225       
-11          0.013079    0.078925              0.995815       0.9824                    53.5648       
-12          0.0110601   0.0960848             0.996232       0.9828                    57.5095       
-13          0.0115849   0.0925806             0.996599       0.9822                    61.4513       
-14          0.014988    0.0839504             0.995399       0.9818                    65.4373       
-15          0.0106209   0.0794084             0.996682       0.9832                    69.4073       
-16          0.00842235  0.10651               0.997649       0.9803                    73.3788       
-17          0.00726848  0.102539              0.997733       0.9815                    77.3515       
-18          0.0119389   0.0910986             0.996699       0.9838                    81.3353       
-19          0.0109424   0.0907164             0.997066       0.983                     85.3474       
-20          0.00757545  0.107515              0.997699       0.9802                    89.3063   
+1           0.192037    0.0958304             0.9416         0.9711                    136.969       
+2           0.0754357   0.080027              0.976299       0.9745                    141.146       
+3           0.0480771   0.0853976             0.984765       0.9744                    145.713       
+
+(...途中省略...)
+
+18          0.00856742  0.114604              0.997416       0.9817                    209.29        
+19          0.00997513  0.105292              0.997283       0.9817                    213.263       
+20          0.00816262  0.127226              0.997632       0.9807                    217.057       
 ```
 
 @<icon>{cheiko} 「動いたわね。これは CPU と比べて速くなっているのかしら？」
 
-@<icon>{cheita} 「手元の i7-6800K CPU @ 3.40 GHz と Radeon RX Vega 10 を比較すると、後者の方が 5 倍程度高速に訓練を回せているみたいだね。」
+@<icon>{cheita} 「オプションを指定せずに CPU を使って訓練を行ったとき（Intel Core i3-7100 CPU @ 3.90GHz 使用）とこの AMD GPU 使用時（Radeon RX Vega 10）を比較すると、後者の方が 9 倍程度高速に訓練を回せているみたいだね。CPU を使ったときの 1 エポックにかかる時間の平均は 35.4 秒程度で、AMD GPU を使った場合は 3.95 秒程度だった。ちなみに、Google Colab 上で無料で使える NVIDIA T4 GPU を使った場合は、3.33 秒程度だった。」
 
-@<icon>{cheiko} 「やっぱりエヌビｄぃ」
+@<icon>{cheiko} 「ってことはやっぱりエヌビｄぃ」
 
-@<icon>{cheita} 「（さえぎって）色々なハードウェアがサポートされるのはいいことだね！！」
+@<icon>{cheita} 「（さえぎって）GPU の性能や CPU によっても訓練スクリプトの動作時の性能は変わってくるから、この数字を単純比較はできないよ！ともかく、色々なハードウェアがサポートされるのはいいことだね！！」
 
 @<icon>{yousei} 「もうじき某ブランチもマージされて、CuPy は公式に AMD GPU をサポートする予定だよ。」
 
@@ -273,9 +292,10 @@ epoch       main/loss   validation/main/loss  main/accuracy  validation/main/acc
 
 ## 最後に
 
+* 今回の実験や環境構築などは全て GPU Eater (https://www.gpueater.com/) の AMD GPU インスタンス `a1.vegafe` 上で行いました。
 * 今回使用した Docker イメージをビルドするための Dockerfile は、以下のリポジトリで配布しています。：https://github.com/chainer-community/techbookfest7/tree/master/src/docker/cupy-amd/Dockerfile
 * Vega 10 と CPU を用いた実験結果のログも、上記リポジトリにある以下のファイルにまとめられていますので、興味のある方は参照してください。：https://github.com/chainer-community/techbookfest7/tree/master/src/docker/cupy-amd/README.md
-* 現在、NVIDIA GPU 用の CuPy が Thrust を使っているもの（sort や argsort など）はサポートされていないため、例えば ChainerCV の物体検出の example などは動きません（non-maximum suppression (NMS) で cupy.argsort が必要なため）。hipThrust (https://github.com/ROCmSoftwarePlatform/Thrust) というものも開発されているようですが、CuPy での対応は未定です。sort を行う CUDA カーネルを新たに書いて、それを hip でコンパイルしたものを使うように CuPy 内部で AMD GPU 環境下で sort / argsort が呼ばれた際の動作を変更する（現在は Thrust が無い、という RuntimeError が出る）修正を行えば、速度は遅いものの sort / argsort が使えるようにはなると思います。CuPy はオープンソースですので、皆で機能を追加していきましょう！
+* 現在、NVIDIA GPU 用の（通常の）CuPy が内部で Thrust を使っている関数（`sort` や `argsort` など）はサポートされていないため、例えば ChainerCV の物体検出の example などは動きません（non-maximum suppression (NMS) で `cupy.argsort` が必要なため）。hipThrust (https://github.com/ROCmSoftwarePlatform/Thrust) というものも開発されているようですが、CuPy での対応は未定です。sort を行う CUDA カーネルを新たに書いて、それを hip でコンパイルしたものを使うように CuPy 内部で AMD GPU 環境下で `sort` / `argsort` が呼ばれた際の動作を変更する（現在は Thrust が無い、という RuntimeError が出る）修正を行えば、速度は遅いものの `sort` / `argsort` が使えるようにはなると思います。CuPy はオープンソースですので、皆で機能を追加していきましょう！
 
 #### 注意
 
