@@ -99,49 +99,38 @@ view_dataset_samples('test', dataset_test)
 
 ![データセットのサンプル](src/images/chug_03_dataset_sample.png)
 
-このデータセットはStanford Online Products datasetといって一般に公開されているデータであり、Ebayの12のの分類がされたデータです。
+この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のEbayに登録されている商品を12の分類(bicycle, cabinet, chainer, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
+
+//footnote[fn02][http://cvgl.stanford.edu/projects/lifted_struct/]
 
 
-トレーニングデータとテストデータの両方を見せて、画像がかぶっていないことを確認させる
+画像データセットには学習用データセット(train)とテスト用データセット(test)があります。これらは、学習用データセットを使いモデルを構築して、テスト用データセットを使い構築したモデルを評価する。というように使います。そのため、学習データとテスト用データで画像が混ざってはいけません。それではカンニングになってしまいますからね。
+
 
 
 
 ## 画像変換クラスの作成
 
+次に画像変換クラスを作成しておきます。
+
 ```
-class TrainTransform(object):
+from chainercv.transforms import scale
+from chainercv.transforms import center_crop
+
+class ImageTransform(object):
 
     def __init__(self, mean):
         self.mean = mean
 
     def __call__(self, in_data):
-        img, label = in_data
-        img = random_sized_crop(img)
-        img = resize(img, (224, 224))
-        img = random_flip(img, x_random=True)
-        img -= self.mean
-        return img, label
-      
-```
-
-TrainTransformの意義を説明する。random_size_crop, resize, random_flipがあることの効果を論文を引用して説明する。
-
-
-
-```
-class ValTransform(object):
-
-    def __init__(self, mean):
-        self.mean = mean
-
-    def __call__(self, in_data):
-        img, label = in_data
+        img, _, label = in_data
         img = scale(img, 256)
         img = center_crop(img, (224, 224))
         img -= self.mean
         return img, label
 ```
 
+TrainTransformの意義を説明する。random_size_crop, resize, random_flipがあることの効果を論文を引用して説明する。
 ValTransformの意義を説明する。TrainTransoformと比較して、center_cropである理由を説明する。
 
 
