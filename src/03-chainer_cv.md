@@ -1,26 +1,36 @@
-# ChainerCV で画像識別してみよう！
+# しったかChainerCV～ResNetで画像識別してみよう～
 
-@<icon>{yousei} 「前回は、ChainerCVを使って画像処理の基礎についてお話しましたね。覚えている？」
 
-　
-
-@<icon>{cheiko} 「も、もちろんよ。チャネルの構成や、画像の変形、水増し、データセットについて学んだわ。覚えることがたくさんあって大変だったけど、なんとか理解したわ。」
+@<icon>{yousei} 「前回はChainerCVを使って画像処理の基礎についてお話したよね。覚えている？」
 
 　
 
-@<icon>{cheita} 「まぁ、基礎だったからね。ちょっと物足りなかったかなぁ。（チラっ」
-
-　
-　
-@<icon>{cheiko} 「・・・え？　なにこの子。うざいわ。」
+@<icon>{cheiko} 「もちろんよ。画像のチャネル構成や、画像変形、水増し、データセットについて学んだし復習もしたから大丈夫よ。」
 
 　
 
-@<icon>{yousei} 「そうだよね。では今回は画像を使ってDeepLearningしてみよう！」
+@<icon>{yousei} 「じゃあ今回は、ちょっと進めてResNetモデルを使って本格的にDeepLearningで画像分類をしてみよう。Chainerを使うと簡単に実装できることがわかるよ。」
 
 　
 
-DeepLearningと言っても難しくはありません。順に進めていくと不思議とできちゃういます。さぁなにはともあれChainerCVをインストール！
+@<icon>{cheiko} 「れずねっと？」
+
+　
+
+@<icon>{cheita} 「ResNetだよ。DeepLearning界隈で有名なImageNetの分類問題のコンペであるILSVRC 2015でエラー率3.57%となり、1位を獲得したモデルさ。正式にはResidualNetといい、残差を・・・」
+
+　
+
+@<icon>{cheiko} 「・・・（またはじまったわ。この子）」
+
+　
+
+@<icon>{yousei} 「よく知っているね。今日はその高精度なモデルResNetであっても実装は簡単だということを見せてあげよう。」
+
+　
+　
+
+先生の言う通り、DeepLearningで画像分類と言ってもChainerを使えば難しくはありません。手順どおりに進めていくだけでできちゃいます。なにはともあれChainerCVをインストールしてはじめよう！
 
 
 ```
@@ -30,52 +40,61 @@ DeepLearningと言っても難しくはありません。順に進めていく�
 #### 注意
 
 * この章ではGoogleColabratory@<fn>{fn01}上で実行することを想定しています。
-* 現時点でGoogleColabratoryはchainer 5.4.0がインストールされているため合わせてChainerCVは0.12としました。chainerとchainercvとのバージョンの組み合わせはhttps://github.com/chainer/chainercv を参照してください。
+* GoogleColabratoryではGPUを使うように設定してください。メニューの[ランタイム]-[ランタイムのタイプを変更]で[ハードウェアアクセラレータ]項目に[GPU]を設定してください。
+* 執筆時点でGoogleColabratoryはChainer 5.4.0がインストールされているため合わせてChainerCVは0.12を指定しています。ChainerとChainerCVとの組み合わせはhttps://github.com/chainer/chainercv を参照してください。
 
 //footnote[fn01][https://colab.research.google.com/]
-
-
-
-## 全体の流れ
-
-1. 学習データを用意する。合わせてテストデータも用意しましょう。
-1. モデルを構築する
-1. 学習をする/定期的にevaluationする
-1. テストする
 
 
 
 ## データセットの用意
 
 
-まずはともあれ画像データを用意する必要があります。ChainerCVには大量の画像データセットを1行で取得できる簡単な仕組みを備えています。
+最初に画像分類するための画像を用意しましょう。めんどくさい画像収集もChainerCVを使えば、画像データセットを数行で取得できる仕組みがあります。
 
 ```
 import numpy as np
 import random
 
+import chainer
 from chainercv.datasets import OnlineProductsDataset
 from chainercv.datasets import online_products_super_label_names as label_names
-from chainercv.transforms import resize
-from chainercv.utils import tile_images
-from chainercv.visualizations import vis_image
 
-dataset = OnlineProductsDataset()
-images = []
-for c in range(5):
-  i = random.randint(0, dataset.__len__())
-  _data = dataset.get_example(i)
-  _image = resize(_data[0], (200,200))
-  _label = _data[2]
-  print("label:{},{}".format(_label, label_names[_label]))
-  images.append(_image)
-
-tile_image = tile_images(np.array(images), 5)
-vis_image(tile_image)
-
+dataset_train = OnlineProductsDataset(split='train')
+dataset_test = OnlineProductsDataset(split='test')
 ```
 
-最初はデータセットの取得に時間がかかりますが、取得出来たデータのサンプルが確認できるようになりました。サンプル画像がその画像を表しているラベルとともに表示されましたね。
+これだけで学習用画像データセットとテスト用画像データセットが取得できます。さて、どれくらいのデータ量なのか確認してみましょう。
+
+```
+print("dataset train size:{}".format(len(dataset_train)))
+print("dataset test size:{}".format(len(dataset_test)))
+```
+
+上記のコードを実行すると、それぞれ約6万件ぐらいはあることがわかりますね。次にそのデータセットがどのような画像で、それを意味するラベルに何がついているのか確認してみます。
+
+```
+from chainercv.transforms import resize
+import matplotlib.pyplot as plt
+
+def view_dataset_samples(split_name, dataset):
+  fig = plt.figure(figsize=(12, 3))
+  fig.suptitle('sample dataset for {}'.format(split_name), fontsize=20)
+  fig.tight_layout()
+  for i in range(5):
+      _data = random.choice(dataset_train)
+      _image = resize(_data[0], (200, 200))
+      _image = _image.transpose((1, 2, 0))  # CHW -> HWC
+      _title = "{}:{}".format(_data[2], label_names[_data[2]])
+
+      ax = fig.add_subplot(1, 5, i+1)
+      ax.imshow(_image.astype(np.uint8))
+      ax.set_axis_off()
+      ax.set_title(_title)
+
+view_dataset_samples('train', dataset_train)
+view_dataset_samples('test', dataset_test)
+```
 
 
 ![データセットのサンプル](src/images/chug_03_dataset_sample.png)
