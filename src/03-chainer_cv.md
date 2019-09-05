@@ -101,7 +101,7 @@ view_dataset_samples('test', dataset_test)
 ```
 
 
-![データセットのサンプル](src/images/chug_03_dataset_sample.png)
+![データセットのサンプル](src/images/chainercv_dataset_sample.png)
 
 この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のEbayに登録されている商品を12個に分類(bicycle, cabinet, chainer, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
 
@@ -221,7 +221,9 @@ valid_data = TransformDataset(valid, ImageTransform(extractor.mean))
 
 ## トレーナーを作成して、いざ学習スタート
 
-最後に、DeepLearningの学習を効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。構成としては
+最後に、DeepLearningの学習を効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。全体構成としては次の図のようなイメージです。
+
+![トレーナーの構成](src/images/chainercv_trainer_structure.png)
 
 
 ```
@@ -244,18 +246,19 @@ trainer.extend(extensions.PrintReport(
     ['iteration', 'epoch', 'elapsed_time', 'lr', 'main/loss', 'main/accuracy']), 
     trigger=log_interval)
 
-# 定期的に状態をシリアライズ（保存）する機能
+# 定期的に状態を保存する設定
 trainer.extend(
     extensions.snapshot(filename='snapshot_epoch-{.updater.epoch}'))
 trainer.extend(
-    extensions.snapshot_object(model.predictor, 
-    filename='model_epoch-{.updater.epoch}'))
+    extensions.snapshot_object(
+        model.predictor, 
+        filename='model_epoch-{.updater.epoch}'))
 
 # 学習スタート
 trainer.run()
 ```
 
-出力されるログ
+学習が終わるまでに３時間ぐらいかかると思います。トレーナーで設定したログは以下のように出力されます。
 
 ```
 iteration   epoch       elapsed_time  lr          main/loss   main/accuracy
@@ -276,25 +279,45 @@ iteration   epoch       elapsed_time  lr          main/loss   main/accuracy
 7444        10          12194.4       0.000999698  0.714064    0.753167       
 ```
 
+ここで大事なのは、学習するたびにmain/loss値が下がり、main/accuracyが上がっていることを確認することです。さっそくグラフにしてみましょう。数字を追うだけではなくグラフで客観的に見ることも大事です。
+
+
+```
+```
+
+* main/lossとは
+
+* main/accuracyとは
+
+
+
+
 
 
 ## 評価
 
 テストする。
+テストデータセットで評価してみました。全然だめですね。いわゆるこれが過学習(over fitting)という状態です。つまり、学習データに対してだけ性能がよく、テストデータに対しては性能が悪いということです。実際にこのモデルを使う際に、まったく同じ学習データの画像しか使わないのであれば、over fittingでよいのですが、一般的にはそうではありません。
+//blankline
+カメラで撮影される画像には、光の映り込みや、被写体の角度、陰影、色合い等、さまざまな要素が混入してしまいます。これらを状態を無視し、正しいものだけを認識する用にするには、汎化性能が求められることになります。
 
 
-## さいごに
+
+
+## 最後に
 
 いかがでしたでしょうか。DeepLearningといっても難しく考えることはありません。まずはこれらのコードを写経して自分でも試してみてください。そうすることで、少しずつ自分のスキルとして蓄積されていきます。
 
-今回は画像分類をDeepLearningで簡単に実装しました。本来はもうちょっと考慮する部分があります。例えば。。。
+今回は画像分類をDeepLearningで簡単に実装しました。本来はもうちょっとだけ考慮する部分があります。例えば。。。
 
 * バリデーション用データセット、テスト用データセットでの評価
 * Optiomizerの検証
 * 汎化性能の測定と対策
 * ハイパーパラメータの調整
 
-ですね。次回はもうちょっと奥深く進んでいきましょうね。
+なので、これらをカバーできるように次回はもうちょっとだけ奥深く進んでいきましょうね。
+
+
 
 
 
