@@ -1,36 +1,35 @@
-# しったかChainerCV～ResNetで画像識別してみよう～
+# しったかChainerCV～ResNetで画像分類～
 
 
-@<icon>{yousei} 「前回はChainerCVを使って画像処理の基礎についてお話したよね。覚えている？」
+@<icon>{yousei} 「前回はChainerCVを使って画像処理の基礎について学んだよね。覚えているかな？」
 
-　
+//blankline
 
 @<icon>{cheiko} 「もちろんよ。画像のチャネル構成や、画像変形、水増し、データセットについて学んだし復習もしたから大丈夫よ。」
 
-　
+//blankline
 
 @<icon>{yousei} 「じゃあ今回は、ちょっと進めてDeepLearningモデルであるResNetを使って画像分類をしてみよう。ChainerCVを使うと簡単に実装できることがわかるよ。」
 
-　
+//blankline
 
 @<icon>{cheiko} 「れずねっと？」
 
-　
+//blankline
 
 @<icon>{cheita} 「ResNetだよ。DeepLearning界隈で有名なImageNetの分類問題のコンペであるILSVRC 2015でエラー率3.57%となり、1位を獲得したモデルさ。正式にはResidualNetといい、残差を・・・」
 
-　
+//blankline
 
 @<icon>{cheiko} 「・・・（またはじまったわ。この子）」
 
-　
+//blankline
 
 @<icon>{yousei} 「よく知っているね。今日はその高精度なモデルResNetであっても実装は簡単だということを見せてあげよう。」
 
-　
-　
+//blankline
 
-先生の言う通り、DeepLearningで画像分類と言ってもChainerCVを使えば難しくはありません。手順どおりに進めていくだけでできちゃいます。なにはともあれChainerCVをインストールしてはじめよう！
+先生の言う通り、DeepLearningで画像分類と言ってもChainerCVを使えば難しくはありません。手順どおりに進めていくだけでできちゃいます。なにはともあれChainerCVをインストールしてはじめてみよう！
 
 
 ```
@@ -40,7 +39,7 @@
 #### 注意
 
 * この章ではGoogleColabratory@<fn>{fn01}上で実行することを想定しています。
-* GoogleColabratoryではGPUを使うように設定してください。メニューの[ランタイム]-[ランタイムのタイプを変更]で[ハードウェアアクセラレータ]項目に[GPU]を設定してください。
+* GoogleColabratoryではGPUを使うように設定してください。メニューの[ランタイム]-[ランタイムのタイプを変更]で[ハードウェアアクセラレータ]項目で[GPU]を設定できます。
 * 執筆時点でGoogleColabratoryはChainer 5.4.0がインストールされているため合わせてChainerCVは0.12を指定しています。ChainerとChainerCVとの組み合わせはhttps://github.com/chainer/chainercv を参照してください。
 
 //footnote[fn01][https://colab.research.google.com/]
@@ -50,7 +49,7 @@
 ## 画像データの準備
 
 
-最初に画像分類するための画像を用意しましょう。めんどくさい画像収集もChainerCVを使えば、画像データセットを数行で取得できる仕組みがあります。
+まずは、分類するための画像データセットを用意しましょう。めんどくさい画像収集もChainerCVを使えば、数行で取得できます。
 
 ```
 import numpy as np
@@ -64,9 +63,9 @@ dataset_train = OnlineProductsDataset(split='train')
 dataset_test = OnlineProductsDataset(split='test')
 ```
 
-上記のコードだけで学習用画像データセットとテスト用画像データセットが取得できます。学習用データセットを使いモデルを構築し、テスト用データセットを使い構築したモデルを評価する。というように使います。そのため学習用画像データとテスト用画像データで画像が混ざってはいけません。それではカンニングになってしまいますからね。
+上記のコードだけで学習用画像データセットとテスト用画像データセットが取得できます。それぞれ学習用データセットを使いモデルを構築し、テスト用データセットを使い構築したモデルを評価する。というように使います。そのため学習用画像データとテスト用画像データで画像が混ざってはいけません。それではカンニングになってしまいますからね。
 
-　
+//blankline
 
 さて、どれくらいのデータ量なのか確認してみましょう。
 
@@ -75,7 +74,7 @@ print("size:{}".format(len(dataset_train))) # -> size:59551
 print("size:{}".format(len(dataset_test)))  # -> size:60502
 ```
 
-上記のコードを実行すると、それぞれ約6万件ぐらいはあることがわかりますね。次にそのデータセットがどのような画像で、それを意味するラベルに何がついているのか確認してみます。
+それぞれ約6万件ぐらいはあることがわかりますね。次にそのデータセットがどのような画像で、それを意味する分類名に何がついているのか確認してみます。
 
 ```
 from chainercv.transforms import resize
@@ -105,25 +104,26 @@ view_dataset_samples('test', dataset_test)
 
 この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のEbayに登録されている商品を12個に分類(bicycle, cabinet, chainer, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
 
+//blankline
 
-上の画像を見ると、画像とその分類名がセットになっています。このセットがいわゆる教師データとなります。画像と分類をセットで学習し適切なモデルをDeepLearningで構築します。その後、画像のみを与えて正しく分類が推論できるかどうかを評価することになります。
+データセットを見ると、画像にはその分類名が付与されています。このセットがいわゆる教師データとなります。画像と分類名をセットで学習し適切なモデルをDeepLearningで調整します。モデルができたら今度は画像のみを与えて正しく分類名が推論できるかを評価します。
 
 //footnote[fn02][http://cvgl.stanford.edu/projects/lifted_struct/]
 
 
 ## 画像変換クラスの作成
 
-次に画像変換クラスを作成しましょう。ここでは主に画像の前処理について実装します。今回はscaleとcenter_cropを使います。
+次に画像変換クラスを作成します。ここではDeepLearningの前処理を実装することになります。今回はscaleとcenter_cropを使いましょう。
 
 * scale
 
- * これは、画像を縦横を指定する同一長にリサイズする処理です。
- * 実は今回のデータセットの画像は、個々にサイズが異なるため一定のサイズにしたいのです。
+ * これは、画像を縦横を同一長にリサイズする処理です。
+ * 今回のデータセットは、個々に画像サイズが異なるのです。そのため全画像を一定のサイズにします。
 
 * center_crop
 
  * これは、画像の中心を起点に指定サイズで切り取る(トリミング)処理です。
- * scaleで同一サイズにした画像をResNetモデルが処理できるサイズ(224,224)に変換したいのです。scale時に(224,224)を指定してもよいのですが、そもそも個々のサイズが異るため、対象物が中央に配置されないだろうことを危惧しての実装しています。
+ * scaleで同一サイズにした画像をResNetモデルが処理できるサイズ(224,224)に変換したいのです。scale時に(224,224)を指定してもよいのですが、前述の通りそもそも個々のサイズが異るため、対象物が中央に配置されないだろうことを心配しての実装です。
  
 
 ```
@@ -145,9 +145,9 @@ class ImageTransform(object):
 
 
 
-## モデルを実装してみよう
+## モデルの実装
 
-いよいよDeepLearningのコアであるResNetモデルの実装です。とは言ってもChainerCVはResNetモデルがすでに実装されています。なので次のように数行のコードを書くだけでいいのです。なんと簡単っ！
+いよいよDeepLearningのキモであるResNetモデルの実装です。とは言っても難しくありません。ChainerCVにはResNetがすでに実装されているのです。なので数行のコードを書くだけでいいのです。なんと簡単っ！
 
 
 ```
@@ -163,7 +163,7 @@ optimizer = Adam()
 optimizer.setup(model)
 ```
 
-ChainerCVを使えば、DeepLearning界隈で有名な各種モデルを自分で実装することなく簡単に利用することが出来るのです。さらにこれらはコントリビューターによって随時アップデートされ続けているのです。
+ChainerCVを使えば、DeepLearning界隈で有名な各種モデルを自分で実装することなくライブラリのように簡単に利用できます。さらにこれらはコントリビューターによって随時アップデートされ続けているのです。
 
 　
 
@@ -173,9 +173,9 @@ https://chainercv.readthedocs.io/en/v0.12.0/reference/links.html#model
 
 
 
-## ランダムシードの固定化とGPU利用設定
+## ランダムシードとGPU設定
 
-DeepLearningでは内部の各所では、ランダム値が使われています。そのためモデルやパラメータを修正して評価するためにはランダムシードを固定させないと正しい評価はできません。そのための設定です。GPU利用設定も含めてそんなものだな。と理解していただければ結構です。
+DeepLearningの内部ではランダム値が多く使われています。そのためモデルやパラメータを変えた結果を評価するためにはランダムシードを固定させる必要があります。そのための設定です。ここではGPU利用設定も含めて、まぁそんなものだな。と考えていただければ結構です。
 
 ```
 # ランダムシードの固定化
@@ -196,11 +196,13 @@ else:
 ```
 
 
-## 学習用のデータセットを分割して前処理を組み込む
+## 学習データの分割と前処理の組込み
 
-ここでは、学習用データセットを8:2で分割します。一つは本当に学習用として使うセット、もう一つはバリデーション用として使います。今回は問題を簡単にするためにバリデーションについては触れませんが、テスト用データセットとは異なり学習をより効率的に進めるための評価データセットがバリデーション用データセットです。
+次に、学習用データセットを8:2で分割します。一つは本当に学習用として使うセット、もう一つはバリデーション用として使うセットです。今回は問題を簡単にするためにバリデーションについては触れませんが、前述のテスト用データセットとは異なり学習時に、より汎化性能を得るための評価データセットとなります。
 
-次に、さきほど作成した前処理の実装を組み入れます。これはTransoformDatasetクラスに包めるだけです。
+//blankline
+
+そして、さきほど作成した前処理の実装(ImageTransform)を組み入れます。TransoformDatasetクラスに指定するだけです。
 　
 
 ```
@@ -217,13 +219,17 @@ train_data = TransformDataset(train, ImageTransform(extractor.mean))
 valid_data = TransformDataset(valid, ImageTransform(extractor.mean))
 ```
 
+さぁ、これで大体の準備が整いました。
 
 
-## トレーナーを作成して、いざ学習スタート
 
-最後に、DeepLearningの学習を効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。全体構成としては次の図のようなイメージです。
+## いざ学習スタート
+
+DeepLearningを効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。構成としては次の図のようなイメージです。
 
 ![トレーナーの構成](src/images/chainercv_trainer_structure.png)
+
+それではトレーナーの設定も含めて実装してみましょう。
 
 
 ```
@@ -258,7 +264,7 @@ trainer.extend(
 trainer.run()
 ```
 
-学習が終わるまでに３時間ぐらいかかると思います。トレーナーで設定したログは以下のように出力されます。
+さっそく実行してみましょう。学習が終わるには３、４時間ぐらいかかるのではないかと思います。学習中には、状況を示すログが次のように出力されます。
 
 ```
 iteration   epoch       elapsed_time  lr          main/loss   main/accuracy
@@ -279,45 +285,102 @@ iteration   epoch       elapsed_time  lr          main/loss   main/accuracy
 7444        10          12194.4       0.000999698  0.714064    0.753167       
 ```
 
-ここで大事なのは、学習するたびにmain/loss値が下がり、main/accuracyが上がっていることを確認することです。さっそくグラフにしてみましょう。数字を追うだけではなくグラフで客観的に見ることも大事です。
-
+ここで大事なのは、ログが出力されるたびにmain/loss値が0.0に近づき、main/accuracyが1.0に近づくことが観測できるかどうかです。さっそくグラフにしてみましょう。
 
 ```
+import json
+import pandas as pd
+with open('result/log') as f:
+  result = pd.DataFrame(json.load(f)).interpolate()
+
+result[['main/accuracy','main/loss']].plot()
 ```
+
+![学習結果のグラフ](src/images/chainercv_graph.png)
 
 * main/lossとは
 
+ * 損失関数によって算出された「正解とどれくらい離れているかを表す数値」です。0.0に近づくほどロスが少なくなるので正解に近いことを意味します。
+
 * main/accuracyとは
 
+ * 正解率を表す数値です。1.0 に近いほど正解に近いことを意味します。
 
-
-
-
-
-## 評価
-
-テストする。
-テストデータセットで評価してみました。全然だめですね。いわゆるこれが過学習(over fitting)という状態です。つまり、学習データに対してだけ性能がよく、テストデータに対しては性能が悪いということです。実際にこのモデルを使う際に、まったく同じ学習データの画像しか使わないのであれば、over fittingでよいのですが、一般的にはそうではありません。
 //blankline
-カメラで撮影される画像には、光の映り込みや、被写体の角度、陰影、色合い等、さまざまな要素が混入してしまいます。これらを状態を無視し、正しいものだけを認識する用にするには、汎化性能が求められることになります。
+
+グラフからは、main/accuracyは0.85ぐらいで収束しそうなのでまぁまぁですが、main/lossはもっと低い値で収束させたいですよね。
 
 
+
+
+
+## テストデータで評価する
+
+学習データセットで学習した結果、まぁまぁなモデルができたことはわかってきました。それではテストデータセットではどのような結果になるのか確認してみましょう。
+
+```
+from chainer.training import extensions
+from chainer import serializers
+
+predictor = ResNet50(n_class=len(label_names), **{'arch': 'fb'})
+serializers.load_npz("result/model_epoch-10", predictor, strict=True)
+model_predictor = Classifier(predictor)
+model_predictor.to_gpu(GPUID)
+
+split_at = int(len(dataset_test) * 0.3)
+test, _ = sub_dataset.split_dataset(dataset_test, split_at)
+
+test_data = TransformDataset(test, ImageTransform(predictor.mean))
+test_iter = chainer.iterators.SerialIterator(test_data, BATCHSIZE, repeat=False)
+test_evaluator = extensions.Evaluator(test_iter, model_predictor, device=GPUID)
+test_results = test_evaluator()
+print('Test accuracy:', test_results['main/accuracy'])
+```
+
+テストデータセット全体の30%のデータを使って評価してみました。
+
+```
+Test accuracy: 0.6325345
+```
+
+
+学習データセットを使った時と比べて性能は低いです。これが過学習(over fitting)という状態です。学習データセットに対してだけ性能がよく、テストデータセットに対しては性能が低いということです。まったく同じ学習データの画像しか入力されないのであれば、over fittingで良いのですが、一般的にはそうではありません。
+
+//blankline
+
+例えばカメラで撮影される画像には、光の映り込みや、被写体の角度、陰影、色合い等、さまざまな要素が混入する可能性が高いでしょう。これらを無視し、正しいものだけを認識するためには汎化性能が求められることになります。
 
 
 ## 最後に
 
-いかがでしたでしょうか。DeepLearningといっても難しく考えることはありません。まずはこれらのコードを写経して自分でも試してみてください。そうすることで、少しずつ自分のスキルとして蓄積されていきます。
+いかがでしたでしょうか。DeepLearningといっても難しく考えることはありません。まずはコードを写経して自分でもぜひ試してみてください。手を動かすことで、少しずつ自分のスキルになっていきますよ。
 
-今回は画像分類をDeepLearningで簡単に実装しました。本来はもうちょっとだけ考慮する部分があります。例えば。。。
+//blankline
+
+本来、画像分類では、本来はもうちょっとだけ考慮する部分があります。例えば・・・
 
 * バリデーション用データセット、テスト用データセットでの評価
 * Optiomizerの検証
 * 汎化性能の測定と対策
 * ハイパーパラメータの調整
 
-なので、これらをカバーできるように次回はもうちょっとだけ奥深く進んでいきましょうね。
+次回はそのあたりを奥深く進んでいきましょう！
 
 
+//blankline
+//blankline
 
+@<icon>{yousei} 「どうだったかな？ 」
 
+//blankline
+
+@<icon>{cheiko} 「だ、だいじょうぶよ。次回のために復習もしてつもりよ。」
+
+//blankline
+
+@<icon>{cheita} 「早く、次回にならないかなぁ。今回は楽勝だっからからなぁー。僕はOptimizerに興味があるんだよね。AdamかSGDか、learning-rateはどうしようかといつも悩むんだよなぁ・・・お姉ちゃんは知らないだろうけど。」
+
+//blankline
+
+@<icon>{cheiko} 「・・・（この子、ちょっとうざいわ）」
 
