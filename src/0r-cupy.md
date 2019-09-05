@@ -1,2 +1,0 @@
-# ChainerCV @mogami
-
