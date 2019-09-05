@@ -80,7 +80,7 @@ ChainerMNを試したいと思い `chainer/examples/chainermn` を探したと�
 やり取りをしていく中で、Twitterで日本語で対応するよ！と言っていただきました。 お言葉に甘えて、TwitterのDMで日本語でやり取りをしました。  
 分かっていなかったことは丁寧に教えてくださいました。
 
-![レビュワーのFukudaさんとのDMやり取り](./images/contribute_02.JPG)  
+![レビュワーのFukudaさんとのDMやり取り](./images/contribute_02.JPG)
 ※掲載許可頂きました  
   
 
@@ -116,7 +116,7 @@ Githubでは、全て英語でやり取りをしなければならないです�
 //blankline
 //noindent
 
-![Pull requestがMargeされる](./images/contribute_04.JPG)  
+![Pull requestがMargeされる](./images/contribute_04.JPG)
 
 //blankline
 //noindent
