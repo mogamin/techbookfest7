@@ -1,4 +1,4 @@
-# しったかDQN〜ChainerRLを使う前に〜 @ikeyasu
+# しったかDQN〜ChainerRLを使う前に〜
 
 @<icon>{yousei} 「ChainerRLで簡単に強化学習ができるね！ブロック崩しをやってみようよ」
 
