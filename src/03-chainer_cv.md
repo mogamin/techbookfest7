@@ -198,6 +198,11 @@ else:
 
 ## 学習用のデータセットを分割して前処理を組み込む
 
+ここでは、学習用データセットを8:2で分割します。一つは本当に学習用として使うセット、もう一つはバリデーション用として使います。今回は問題を簡単にするためにバリデーションについては触れませんが、テスト用データセットとは異なり学習をより効率的に進めるための評価データセットがバリデーション用データセットです。
+
+次に、さきほど作成した前処理の実装を組み入れます。これはTransoformDatasetクラスに包めるだけです。
+　
+
 ```
 from chainer.datasets import TransformDataset
 from chainer.datasets import sub_dataset
@@ -205,15 +210,19 @@ from chainer.datasets import sub_dataset
 split_at = int(len(dataset_train) * 0.8)
 train, valid = sub_dataset.split_dataset(dataset_train, split_at)
 
+print('{}'.format(len(train))) #-> 47640
+print('{}'.format(len(valid))) #-> 11911
+
 train_data = TransformDataset(train, ImageTransform(extractor.mean))
 valid_data = TransformDataset(valid, ImageTransform(extractor.mean))
-
-print('train_data:{}'.format(len(train_data)))
-print('valid_data:{}'.format(len(valid_data)))
 ```
 
 
-## トレーナーを作成し、学習をスタート
+
+## トレーナーを作成して、いざ学習スタート
+
+最後に、DeepLearningの学習を効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。
+
 
 ```
 from chainer.datasets import LabeledImageDataset
@@ -277,3 +286,14 @@ iteration   epoch       elapsed_time  lr          main/loss   main/accuracy
 ## さいごに
 
 いかがでしたでしょうか。DeepLearningといっても難しく考えることはありません。まずはこれらのコードを写経して自分でも試してみてください。そうすることで、少しずつ自分のスキルとして蓄積されていきます。
+
+今回は画像分類をDeepLearningで簡単に実装しました。本来はもうちょっと考慮する部分があります。例えば。。。
+
+* バリデーション用データセット、テスト用データセットでの評価
+* 汎化性能の測定と対策
+* ハイパーパラメータの調整
+
+ですね。次回はもうちょっと奥深く進んでいきましょうね。
+
+
+
