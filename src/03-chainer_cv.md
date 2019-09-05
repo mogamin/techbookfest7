@@ -221,7 +221,7 @@ valid_data = TransformDataset(valid, ImageTransform(extractor.mean))
 
 ## トレーナーを作成して、いざ学習スタート
 
-最後に、DeepLearningの学習を効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。
+最後に、DeepLearningの学習を効率よく実装できるようにChainerにはTrainerという仕組みが導入されています。構成としては
 
 
 ```
@@ -290,6 +290,7 @@ iteration   epoch       elapsed_time  lr          main/loss   main/accuracy
 今回は画像分類をDeepLearningで簡単に実装しました。本来はもうちょっと考慮する部分があります。例えば。。。
 
 * バリデーション用データセット、テスト用データセットでの評価
+* Optiomizerの検証
 * 汎化性能の測定と対策
 * ハイパーパラメータの調整
 
