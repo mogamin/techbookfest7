@@ -58,8 +58,10 @@ sudo reboot
 次に ROCm のリポジトリを追加します。
 
 ```bash
-wget -qO - http://repo.radeon.com/rocm/apt/debian/rocm.gpg.key | sudo apt-key add -
-echo 'deb [arch=amd64] http://repo.radeon.com/rocm/apt/debian/ xenial main' | sudo tee /etc/apt/sources.list.d/rocm.list
+wget -qO - http://repo.radeon.com/rocm/apt/debian/rocm.gpg.key \
+| sudo apt-key add -
+echo 'deb [arch=amd64] http://repo.radeon.com/rocm/apt/debian/ xenial main' \
+| sudo tee /etc/apt/sources.list.d/rocm.list
 ```
 
 ROCm のリポジトリが追加できたら、`rocm-dkms` というメタパッケージをインストールします。
@@ -94,7 +96,7 @@ rocm-smi
 ROCm の環境構築がうまくいっていれば、以下のような（数値等は GPU の種類によって異なります）出力が表示されます。
 
 ```bash
- ========================ROCm System Management Interface========================
+========================ROCm System Management Interface========================
 ================================================================================
 GPU  Temp   AvgPwr  SCLK     MCLK    Fan    Perf  PwrCap  VRAM%  GPU%  
 0    50.0c  10.0W   1269Mhz  167Mhz  14.9%  auto  220.0W    0%   0%    
@@ -266,16 +268,16 @@ Downloading from http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz...
 Downloading from http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz...
 Downloading from http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz...
 
-epoch       main/loss   validation/main/loss  main/accuracy  validation/main/accuracy  elapsed_time
-1           0.192037    0.0958304             0.9416         0.9711                    136.969       
-2           0.0754357   0.080027              0.976299       0.9745                    141.146       
-3           0.0480771   0.0853976             0.984765       0.9744                    145.713       
+epoch  main/loss   validation/main/loss  main/accuracy  validation/main/accuracy
+1      0.192037    0.0958304             0.9416         0.9711                    
+2      0.0754357   0.080027              0.976299       0.9745                    
+3      0.0480771   0.0853976             0.984765       0.9744                    
 
-(...途中省略...)
+(...略...)
 
-18          0.00856742  0.114604              0.997416       0.9817                    209.29        
-19          0.00997513  0.105292              0.997283       0.9817                    213.263       
-20          0.00816262  0.127226              0.997632       0.9807                    217.057       
+18     0.00856742  0.114604              0.997416       0.9817                    
+19     0.00997513  0.105292              0.997283       0.9817                    
+20     0.00816262  0.127226              0.997632       0.9807                    
 ```
 
 @<icon>{cheiko} 「動いたわね。これは CPU と比べて速くなっているのかしら？」
