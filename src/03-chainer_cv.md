@@ -41,6 +41,7 @@
 * この章ではGoogleColabratory@<fn>{fn01}上で実行することを想定しています。
 * GoogleColabratoryではGPUを使うように設定してください。メニューの[ランタイム]-[ランタイムのタイプを変更]で[ハードウェアアクセラレータ]項目で[GPU]を設定できます。
 * 執筆時点でGoogleColabratoryはChainer 5.4.0がインストールされているため合わせてChainerCVは0.12を指定しています。ChainerとChainerCVとの組み合わせはhttps://github.com/chainer/chainercv を参照してください。
+* Chainerのバージョンは ``print(chainer.__version__)`` で確認できます。
 
 //footnote[fn01][https://colab.research.google.com/]
 
@@ -63,7 +64,7 @@ dataset_train = OnlineProductsDataset(split='train')
 dataset_test = OnlineProductsDataset(split='test')
 ```
 
-上記のコードだけで学習用画像データセットとテスト用画像データセットが取得できます。それぞれ学習用データセットを使いモデルを構築し、テスト用データセットを使い構築したモデルを評価する。というように使います。そのため学習用画像データとテスト用画像データで画像が混ざってはいけません。それではカンニングになってしまいますからね。
+上記のコードだけで学習用画像データセットとテスト用画像データセットが取得できます。流れとしては、学習用データセットを使ってモデルを構築する。次にテスト用データセットを使って構築したモデルの評価をする。という感じです。学習用画像データとテスト用画像データで画像が混ざってはいけません。カンニングになってしまいますからね。
 
 //blankline
 
@@ -102,7 +103,7 @@ view_dataset_samples('test', dataset_test)
 
 ![データセットのサンプル](src/images/chainercv_dataset_sample.png)
 
-この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のEbayに登録されている商品を12個に分類(bicycle, cabinet, chainer, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
+この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のeBayに登録されている商品を12個に分類(bicycle, cabinet, chainer, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
 
 //blankline
 
@@ -117,13 +118,13 @@ view_dataset_samples('test', dataset_test)
 
 * scale
 
- * これは、画像を縦横を同一長にリサイズする処理です。
+ * これは、画像の縦横を同一長にリサイズする処理です。
  * 今回のデータセットは、個々に画像サイズが異なるのです。そのため全画像を一定のサイズにします。
 
 * center_crop
 
  * これは、画像の中心を起点に指定サイズで切り取る(トリミング)処理です。
- * scaleで同一サイズにした画像をResNetモデルが処理できるサイズ(224,224)に変換したいのです。scale時に(224,224)を指定してもよいのですが、前述の通りそもそも個々のサイズが異るため、対象物が中央に配置されないだろうことを心配しての実装です。
+ * scaleで同一サイズにした画像をResNetモデルが処理できるサイズ(224,224)に変換したいのです。scale時に(224,224)を指定してもよいのですが、より中心の物体にフォーカスさせたいな。という程度です。
  
 
 ```
@@ -167,7 +168,7 @@ ChainerCVを使えば、DeepLearning界隈で有名な各種モデルを自分�
 
 　
 
-次のURLにはChainerCVが実装されているモデルについて説明されています。
+次のURLで、ChainerCVが実装している各種モデルについて説明しています。
 
 https://chainercv.readthedocs.io/en/v0.12.0/reference/links.html#model
 
