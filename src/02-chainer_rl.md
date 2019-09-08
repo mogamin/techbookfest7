@@ -205,7 +205,7 @@ DQNでは、@<m>{Q(S, a)}をDeep neural networkで近似しています。特に
 
 ## ChainerRLのQ関数
 
-ChainerRLのAtariのDQNのサンプルの、[examples/atari/train_dqn_ale.py](https://github.com/chainer/chainerrl/blob/master/examples/atari/train_dqn_ale.py)を見てみましょう。
+ChainerRLのAtariのDQNのサンプルの、[`train_dqn_ale.py`](https://github.com/chainer/chainerrl/blob/master/examples/atari/train_dqn_ale.py)を見てみましょう。
 以下の、`parse_arch`でネットワークを作っています。
 
 ```
@@ -279,7 +279,7 @@ Expirience Replayでは、経験したことを保存していきます。これ
 
 ![Experience Replay](src/images/chainerrl_fig4.png)
 
-[examples/atari/train_dqn_ale.py](https://github.com/chainer/chainerrl/blob/master/examples/atari/train_dqn_ale.py)では
+[`examples/atari/train_dqn_ale.py`](https://github.com/chainer/chainerrl/blob/master/examples/atari/train_dqn_ale.py)では
 以下のようにしてReplay Bufferを作っています。
 
 ```
@@ -320,7 +320,7 @@ ChainerRLでは、chainerrl.agents.DQNクラスの中の、[sync_target_network(
 
 これはシンプルで、得られる報酬を-1, 0, 1に固定したというものです。atariのゲームでは得られるスコアが報酬となりますが、それだとゲームによって、報酬のスケールがことなり、ハイパーパラメーターチューニングをゲーム毎にやる必要が生じます。それを防ぐ為に、報酬を-1, 0, 1に固定しています。
 
-これは、ChainerRLのサンプルのtrain_dqn_ale.pyでは、`atari_wrappers.make_atari`の`clip_reward`の設定で見ることができます。
+これは、ChainerRLのサンプルの`train_dqn_ale.py`では、`atari_wrappers.make_atari`の`clip_reward`の設定で見ることができます。
 
 ```
     def make_env(test):
@@ -341,7 +341,7 @@ Skip frameという手法が使われていますが、単にフレームをス�
 さらに手法の名前はないですが、その4フレーム内で各ピクセルでmaxを取っています。そもそも学習時はモノクロにして学習しているのですが、4フレームで一番明るい値を取るようにしているという事です。
 これは、Atariはゲームはとても古いので、1画面に出せるキャラクタが限られていて、フレームによっては表示されないキャラクタがいるためです。
 
-## train_dqn_ale.py を見てみよう
+## `train_dqn_ale.py` を見てみよう
 
-ここまで読んだら、ChainerRLのAtariのDQNのサンプルの[examples/atari/train_dqn_ale.py](https://github.com/chainer/chainerrl/blob/master/examples/atari/train_dqn_ale.py)を上から下まで読んでみてください。アルゴリズムが分かると、ソースがみるみる分かるようになったと思います。
+ここまで読んだら、ChainerRLのAtariのDQNのサンプルの[`train_dqn_ale.py`](https://github.com/chainer/chainerrl/blob/master/examples/atari/train_dqn_ale.py)を上から下まで読んでみてください。アルゴリズムが分かると、ソースがみるみる分かるようになったと思います。
 ChainerRLはアルゴリズムの実装を肩代わりしてくれるため、とても簡単に使えますが、使いこなすには、そのアルゴリズムを知っておく必要があります。ぜひ、元論文のChainerRLのソースコードを見比べながら、各アルゴリズムの学習を楽しんでください。

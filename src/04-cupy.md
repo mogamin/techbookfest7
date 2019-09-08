@@ -221,7 +221,7 @@ hand written kernel time 1.5921421766281127 ms
 cuBLAS              time 0.6761380195617676 ms
 ```
 
-## AMD GPU で Chainer の MNIST example を動かす
+## MNIST example を動かす
 
 @<icon>{cheiko} 「ダダダダダダダダ！！！撃て撃てえええ！！」
 
