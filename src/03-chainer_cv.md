@@ -38,9 +38,9 @@
 
 #### 注意
 
-* この章ではGoogleColabratory@<fn>{fn01}上で実行することを想定しています。
-* GoogleColabratoryではGPUを使うように設定してください。メニューの[ランタイム]-[ランタイムのタイプを変更]で[ハードウェアアクセラレータ]項目で[GPU]を設定できます。
-* 執筆時点でGoogleColabratoryはChainer 5.4.0がインストールされているため合わせてChainerCVは0.12を指定しています。ChainerとChainerCVとの組み合わせはhttps://github.com/chainer/chainercv を参照してください。
+* この章ではGoogleColaboratory@<fn>{fn01}上で実行することを想定しています。
+* GoogleColaboratoryではGPUを使うように設定してください。メニューの[ランタイム]-[ランタイムのタイプを変更]で[ハードウェアアクセラレータ]項目で[GPU]を設定できます。
+* 執筆時点でGoogleColaboratoryはChainer 5.4.0がインストールされているため合わせてChainerCVは0.12を指定しています。ChainerとChainerCVとの組み合わせはhttps://github.com/chainer/chainercv を参照してください。
 * Chainerのバージョンは ``print(chainer.__version__)`` で確認できます。
 
 //footnote[fn01][https://colab.research.google.com/]
@@ -86,7 +86,7 @@ def view_dataset_samples(split_name, dataset):
   fig.suptitle('sample dataset for {}'.format(split_name), fontsize=20)
   fig.tight_layout()
   for i in range(5):
-      _data = random.choice(dataset_train)
+      _data = random.choice(dataset)
       _image = resize(_data[0], (200, 200))
       _image = _image.transpose((1, 2, 0))  # CHW -> HWC
       _title = "{}:{}".format(_data[2], label_names[_data[2]])
@@ -101,9 +101,12 @@ view_dataset_samples('test', dataset_test)
 ```
 
 
-![データセットのサンプル](src/images/chainercv_dataset_sample.png)
+![学習用画像データセットのサンプル](src/images/chainercv_dataset_sample1.png)
 
-この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のeBayに登録されている商品を12個に分類(bicycle, cabinet, chainer, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
+![テスト用画像データセットのサンプル](src/images/chainercv_dataset_sample2.png)
+
+
+この画像データセットはStanford大学が公開しているOnline Products dataset@<fn>{fn02}です。オンライン販売のeBayに登録されている商品を12個に分類(bicycle, cabinet, chair, coffe_maker, fan, kettle, lamp, mug, sofa, stapler, table, toaster)したデータです。
 
 //blankline
 
@@ -168,7 +171,7 @@ ChainerCVを使えば、DeepLearning界隈で有名な各種モデルを自分�
 
 　
 
-次のURLで、ChainerCVが実装している各種モデルについて説明しています。
+次のURLでは、ChainerCVが実装している各種モデルを説明しています。
 
 https://chainercv.readthedocs.io/en/v0.12.0/reference/links.html#model
 
@@ -176,7 +179,7 @@ https://chainercv.readthedocs.io/en/v0.12.0/reference/links.html#model
 
 ## ランダムシードとGPU設定
 
-DeepLearningの内部ではランダム値が多く使われています。そのためモデルやパラメータを変えた結果を評価するためにはランダムシードを固定させる必要があります。そのための設定です。ここではGPU利用設定も含めて、まぁそんなものだな。と考えていただければ結構です。
+DeepLearningの内部ではランダム値が多く使われています。そのためモデルやパラメータを変えた結果を評価するためにはランダムシードを固定させる必要があります。そのための設定です。ここではGPU利用設定も含めて、まぁそんなもんだな。と、頭の片隅に置いておくだけでいいです。
 
 ```
 # ランダムシードの固定化
